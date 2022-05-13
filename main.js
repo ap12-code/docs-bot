@@ -17,9 +17,9 @@ process.on("uncaughtException", (err) => {
 const fs = require("fs");
 const config = require("./config.js")
 
-const pydoc = JSON.parse(fs.readFileSync(__dirname + "/dpy.json").toString()).classes;
-const jsdoc = JSON.parse(fs.readFileSync(__dirname + "/djs.json").toString()).classes;
-const jdadoc = fs.readFileSync(__dirname + "/jda.txt").toString().split("\n");
+const pydoc = JSON.parse(fs.readFileSync(__dirname + "/docs/dpy.json").toString()).classes;
+const jsdoc = JSON.parse(fs.readFileSync(__dirname + "/docs/djs.json").toString()).classes;
+const jdadoc = fs.readFileSync(__dirname + "/docs/jda.txt").toString().split("\n");
 
 client.on("ready", () => {
     console.log("ready");
