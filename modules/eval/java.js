@@ -36,7 +36,7 @@ module.exports = async (args, callback) => {
                         clearTimeout(timeout);
                         fs.unlinkSync("./proc/" + filename + ".java");
                         fs.unlinkSync("./proc/" + filename + ".class");
-                        return callback("```" + ms.split("\n").slice(0, 15).join("\n").replace(/akihi/g, "<User>") + `${ms.split("\n").length > 15 ? "\n...more " + (ms.split("\n").length - 15) + " line(s)" : ""}` + "```")
+                        return callback("```" + ms.split("\n").slice(0, 15).join("\n") + `${ms.split("\n").length > 15 ? "\n...more " + (ms.split("\n").length - 15) + " line(s)" : ""}` + "```")
                     });
                     j2.stdout.on("data", (chunk) => {
                         ms += iconv.decode(Buffer.from(chunk), "utf-8");
@@ -46,7 +46,7 @@ module.exports = async (args, callback) => {
                     });
                 } else {
                     clearTimeout(timeout);
-                    return callback("```" + ms.split("\n").slice(0, 15).join("\n").replace(/akihi/g, "<User>") + `${ms.split("\n").length > 15 ? "\n...more " + (ms.split("\n").length - 15) + " line(s)" : ""}` + "```")
+                    return callback("```" + ms.split("\n").slice(0, 15).join("\n") + `${ms.split("\n").length > 15 ? "\n...more " + (ms.split("\n").length - 15) + " line(s)" : ""}` + "```")
                 }
             }, 10);
         })

@@ -51,7 +51,7 @@ client.on("messageCreate", async (message) => {
             require("./modules/eval")(message, args, (msg) => {
                 const embed = new Bot.MessageEmbed()
                 .setTitle("Eval")
-                .setDescription(msg);
+                .setDescription(msg.replace(new RegExp(config.whitelist, "g"), ""));
                 message.channel.send({embeds: [embed]});
             });
         }, 500);

@@ -30,7 +30,7 @@ module.exports = (file, callback) => {
         j.on("exit", () => {
             fs.unlinkSync("./proc/" + file);
             clearTimeout(timeout);
-            return callback("```" + ms.split("\n").slice(0, 15).join("\n").replace(/akihi/g, "<User>") + `${ms.split("\n").length > 15 ? "\n...more " + (ms.split("\n").length - 15) + " line(s)" : ""}` + "```")
+            return callback("```" + ms.split("\n").slice(0, 15).join("\n") + `${ms.split("\n").length > 15 ? "\n...more " + (ms.split("\n").length - 15) + " line(s)" : ""}` + "```")
         });
         j.on("error", (e) => {
             console.log(e);
