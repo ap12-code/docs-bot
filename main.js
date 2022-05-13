@@ -352,4 +352,4 @@ client.on("messageCreate", async (message) => {
     }
 });
 
-client.login("OTczNTU5NzA0NzcwOTkwMTUw.G9xeUt.vWyL02td3xAkYH1jnp7IcndcKKrpTR_T-MUot0");
+client.login("");
