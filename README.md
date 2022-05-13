@@ -1,5 +1,8 @@
 # docs-bot
 
+# Dependencies
+> `npm i iconv-lite request-promise ps-tree discord.js`
+
 # Docs
 discord.js discord.py jda
 > `>docs (js|py|jda)`
@@ -24,4 +27,4 @@ node.js python java
 }
 ```
 
-This bot created by ap12#3724
+`This bot created by ap12#3724`
