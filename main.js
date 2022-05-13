@@ -7,10 +7,7 @@ const client = new Bot.Client({
     ]
 });
 
-const iconv = require("iconv-lite")
 
-const { exec } = require("child_process")
-const psTree = require("ps-tree")
 // const unzip = require("unzip")
 
 process.on("uncaughtException", (err) => {
@@ -18,7 +15,7 @@ process.on("uncaughtException", (err) => {
 })
 
 const fs = require("fs");
-const request = require("request-promise")
+const config = require("./config.js")
 
 const pydoc = JSON.parse(fs.readFileSync(__dirname + "/dpy.json").toString()).classes;
 const jsdoc = JSON.parse(fs.readFileSync(__dirname + "/djs.json").toString()).classes;
@@ -29,12 +26,8 @@ client.on("ready", () => {
     client.user.setActivity({name: ">help", type: "LISTENING"})
 });
 
-const whitelist = ["968323582323196053", "971043823985758229"]
-const appPath = ["node", "C:/Users/akihi/AppData/Local/Programs/Python/Python310/python.exe"]
 
-function unlink(filename) {
-    fs.unlinkSync(`${__dirname}/proc/${filename}`)
-}
+const whitelist = config.whitelist
 
 client.on("messageCreate", async (message) => {
     if (message.author.bot) return
@@ -54,198 +47,14 @@ client.on("messageCreate", async (message) => {
         if (!whitelist.includes(message.guild.id)) {
             message.channel.send("このサーバーでは`>eval`が許可されていません。")
         }
-        console.log(message.content)
-        let file = `/proc/run.${args[1]}`
-        if (message.attachments.first() && ["py", "js", "java"].includes(args[1])) {
-            const data = await request.get(message.attachments.first().url)
-            file = `/proc/${message.attachments.first().name}`
-            fs.writeFileSync(`${__dirname}/proc/${message.attachments.first().name}`, data)
-        } else if (!message.attachments.first() && message.attachments.first().name.endsWith(".zip")) {
-            /* const data = await request.get(message.attachments.first().url)
-            fs.writeFileSync("./tmp.zip", data)
-            fs.createReadStream('./tmp.zip').pipe(unzip.Extract({path: './proc/'}));
-            if (args[1] == "java") {
-                
-            } */
-        } else if (!message.attachments.first() && args[1] != "java") {
-            fs.writeFileSync(__dirname + "/proc/run." + args[1], args[2])
-        }
-        let ms = ""
         setTimeout(() => {
-            switch(args[1]) {
-                case "py":
-                    ms = `> python ./proc/${file}\n`
-                    timeout = setTimeout(() => {
-                        if (!j.connected) {
-                            psTree(j.pid, (err, child) => {
-                                child.forEach(ch => {
-                                    process.kill(ch.PID)
-                                });
-                            });
-                            b.removeAllListeners("exit")
-                            const embed = new Bot.MessageEmbed()
-                            .setTitle("node.js Eval")
-                            .setDescription("```プログラムが10秒間終了または応答しなかった為、強制停止しました。```");
-                            message.channel.send({embeds: [embed]});
-                        }
-                    }, 10000)
-                    const b = exec(`"C:/Users/akihi/AppData/Local/Programs/Python/Python310/python.exe" ./proc/${file}`)
-                    b.on("exit", () => {
-                        const embed = new Bot.MessageEmbed()
-                        .setTitle("Python Eval")
-                        .setDescription("```" + ms.slice(0, 100).replace(/akihi/g, "<User>") + `${ms.length > 100 ? "...more " + (ms.length - 100) + " charactors" : ""}` + "```");
-                        message.channel.send({embeds: [embed]});
-                        unlink(file);
-                        clearTimeout(timeout);
-                    })
-                    .on("error", (e) => {
-                        console.log(e)
-                    })
-                    b.stdout.on("data", (chunk) => {
-                        // console.log(chunk.toString())
-                        ms += chunk
-                    })
-                    b.stderr.on("data", (chunk) => {
-                        // console.log(chunk.toString())
-                        ms += chunk
-                    })
-                    break;
-                case "js":
-                    ms = "node.js "
-                    exec(`node --version`)
-                    .stdout.on("data", (c) => {
-                        ms += c
-                    })
-                    .on("end", () => {
-                        timeout = setTimeout(() => {
-                            if (!j.connected) {
-                                psTree(j.pid, (err, child) => {
-                                    child.forEach(ch => {
-                                        process.kill(ch.PID)
-                                    });
-                                });
-                                j.removeAllListeners("exit")
-                                const embed = new Bot.MessageEmbed()
-                                .setTitle("node.js Eval")
-                                .setDescription("```プログラムが10秒間終了または応答しなかった為、強制停止しました。```");
-                                message.channel.send({embeds: [embed]});
-                            }
-                        }, 10000)
-                        ms += "\n"
-                        ms += `> node ./proc/${file}\n`
-                        const j = exec(`node ./proc/${file}`)
-                        j.on("exit", () => {
-                            const embed = new Bot.MessageEmbed()
-                            .setTitle("node.js Eval")
-                            .setDescription("```" + ms.slice(0, 100).replace(/akihi/g, "<User>") + `${ms.length > 100 ? "...more " + (ms.length - 100) + " charactors" : ""}` + "```");
-                            message.channel.send({embeds: [embed]});
-                            unlink(file);
-                            clearTimeout(timeout);
-                        })
-                        .on("error", (e) => {
-                            console.log(e);
-                        })
-                        j.stdout.on("data", (chunk) => {
-                            // console.log(chunk.toString())
-                            ms += chunk
-                        })
-                        j.stderr.on("data", (chunk) => {
-                            // console.log(chunk.toString())
-                            ms += chunk
-                        })
-                    });
-                    break
-                case "java":
-                    ms = ""
-                    // ok: console.log(args[2])
-                    const jv = exec(`C:/jdk-17.0.2/bin/java.exe -version`)
-                    .on("exit", () => {
-                        timeout = setTimeout(() => {
-                            if (!j.connected) {
-                                psTree(j.pid, (err, child) => {
-                                    child.forEach(ch => {
-                                        process.kill(ch.PID)
-                                    });
-                                });
-                                j.removeAllListeners("exit")
-                                const embed = new Bot.MessageEmbed()
-                                .setTitle("Java Eval")
-                                .setDescription("```プログラムが10秒間終了または応答しなかった為、強制停止しました。```");
-                                message.channel.send({embeds: [embed]});
-                            }
-                        }, 10000)
-                        ms += "\n"
-                        
-                        const filename = `${args[2].match(/.+class (.+?) \{/) ? args[2].match(/.+class (.+?) \{/)[1] : ""}`
-                        if (!filename) {
-                            const embed = new Bot.MessageEmbed()
-                            .setTitle("Java Eval")
-                            .setDescription("```" + "ファイルからクラス名を検出できませんでした。\n実行を停止します。" + "```");
-                            message.channel.send(embed)
-                            clearTimeout(timeout)
-                            return
-                        }
-                        fs.writeFileSync(__dirname + `/${filename}.java`, iconv.encode(args[2], "utf-8"))
-                        ms += `> javac ./proc/${filename}.java\n`
-                        ms2 = null
-                        const j = exec(`C:/jdk-17.0.2/bin/javac.exe ./proc/${filename}.java -J-Dfile.encoding=UTF-8`)
-                        j.on("exit", (code) => {
-                            setTimeout(() => {
-                                if (code == 0) {
-                                    ms += `\n> cd ./proc \n/proc> java ${filename}\n`
-                                    const j2 = exec(`cd /proc & :/jdk-17.0.2/bin/java.exe ${filename} -J-Dfile.encoding=UTF-8`)
-                                    j2.on("exit", () => {
-                                        const embed = new Bot.MessageEmbed()
-                                        .setTitle("Java Eval")
-                                        .setDescription("```" + ms.slice(0, 300).replace(/akihi/g, "<User>") + `${ms.length > 300 ? "...more " + (ms.length - 300) + " charactors" : ""}` + "```");
-                                        message.channel.send({embeds: [embed]});
-                                        clearTimeout(timeout)
-                                        unlink(filename + ".java")
-                                        unlink(filename + ".class")
-                                    })
-                                    .stdout.on("data", (chunk) => {
-                                        ms += iconv.decode(Buffer.from(chunk), "utf-8")
-                                    })
-                                    j2.stderr.on("data", (chunk) => {
-                                        ms += iconv.decode(Buffer.from(chunk), "utf-8")
-                                    })
-                                } else {
-                                    const embed = new Bot.MessageEmbed()
-                                    .setTitle("Java Eval")
-                                    .setDescription("```" + ms.slice(0, 300).replace(/akihi/g, "<User>") + `${ms.length > 300 ? "...more " + (ms.length - 300) + " charactors" : ""}` + "```");
-                                    message.channel.send({embeds: [embed]});
-                                    clearTimeout(timeout)
-                                    // console.log(require("jschardet").detect(Buffer.from(ms2)), ms2)
-                                }
-                            }, 10)                     
-                        })
-                        .on("error", (e) => {
-                            console.log(e)
-                        })
-                        j.stdout.on("data", (chunk) => {
-                            // console.log(chunk.toString())
-                            ms += iconv.decode(Buffer.from(chunk), "utf-8")
-                            
-                        })
-                        j.stderr.on("data", (chunk) => {
-                            // console.log(chunk.toString())
-                            ms += iconv.decode(Buffer.from(chunk), "utf-8")
-                            
-                        })
-                        
-                    })
-                    .on("error", (e) => {
-                        console.log(e)
-                    })
-                    jv.stdout.on("data", (c) => {
-                        ms += c
-                    })
-                    jv.stderr.on("data", (c) => {
-                        ms += c
-                    })
-                break
-            }
-        }, 500)
+            require("./modules/eval")(message, args, (msg) => {
+                const embed = new Bot.MessageEmbed()
+                .setTitle("Eval")
+                .setDescription(msg);
+                message.channel.send({embeds: [embed]});
+            });
+        }, 500);
     }
     if (args[0] == ">docs") {
         switch(args[1]) {
@@ -352,4 +161,4 @@ client.on("messageCreate", async (message) => {
     }
 });
 
-client.login("");
+client.login(config.token);
