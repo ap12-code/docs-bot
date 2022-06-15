@@ -32,7 +32,6 @@ const whitelist = config.whitelist
 client.on("messageCreate", async (message) => {
     if (message.author.bot) return
     const args = [message.content.split(" ")[0], message.content.split(" ")[1], message.content.split(" ").slice(2).join(" ")];
-    console.log(args)
     if (args[0] == ">help") {
         const help = new Bot.MessageEmbed()
         .setTitle("HELP")
@@ -69,16 +68,16 @@ client.on("messageCreate", async (message) => {
                 pydoc.forEach(elm => {
                     elm.props ? elm.props.forEach(e => {
                         if (args[2].includes(".") && `${elm.name}.${e.name}`.toLowerCase().includes(args[2].toLowerCase())) {
-                            result.push(" [:regional_indicator_p: " + elm.name + "." + e.name + "](https://discord.js.org/#/docs/discord.js/stable/class/" + elm.name + "?scrollTo=" + e.name + ") ");
+                            result.push(" [:regional_indicator_p: " + elm.name + "." + e.name + "](" + e.link + ") ");
                         }                        
                     }) : null;
                     elm.methods ? elm.methods.forEach(e => {
-                        if (args[2].includes(".") && `${elm.name}.${e.name}`.toLowerCase().includes(args[2].toLowerCase())) {
-                            result.push(" [:regional_indicator_m: " + elm.name + "." + e.name + "](https://discord.js.org/#/docs/discord.js/stable/class/" + elm.name + "?scrollTo=" + e.name + ") ");
+                        if (args[2].includes(".") && `${elm.name}.${e.name}`.toLowerCase().includes(args[2].toLowerCase().replace(/(\(|\))/g, ""))) {
+                            result.push(" [:regional_indicator_m: " + elm.name + "." + e.name + "](" + e.link + ") ");
                         }
                     }) : null;
                     if (!args[2].includes(".") && elm.name.toLowerCase().includes(args[2].toLowerCase())) {
-                        result.unshift(" [:regional_indicator_c: " + elm.name + "](https://discord.js.org/#/docs/discord.js/stable/class/" + elm.name + ") ");
+                        result.unshift(" [:regional_indicator_c: " + elm.name + "." + e.name + "](" + e.link + ") ");
                     }
                 });
                 setTimeout(() => {
@@ -117,6 +116,9 @@ client.on("messageCreate", async (message) => {
                     }) : null;
                     if (!args[2].includes(".") && elm.name.toLowerCase().includes(args[2].toLowerCase())) {
                         result.unshift(" [:regional_indicator_c: " + elm.name + "](https://discord.js.org/#/docs/discord.js/stable/class/" + elm.name + ") ");
+                    } else if (!args[2].includes(".")) {
+                        result.push(` [:regional_indicator_p: ${elm.name}.${e.name}(${e.params ? e.params.map(fn => `${fn.name}${fn.optional ? "?" : ""}: ${fn.type[0][0].join("|")}`).join(",") : ""}): ${e.returns.types ? e.returns.types.flat(2).join("") : "void"}](https://discord.js.org/#/docs/discord.js/stable/class/${elm.name}?scrollTo=${e.name}) `);
+                        elm.props ? elm.props.find(fn => fn.name.toLowerCase().includes(args[2].toLowerCase())) : null
                     }
                 });
                 setTimeout(() => {

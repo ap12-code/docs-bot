@@ -15,7 +15,7 @@ module.exports = async (args, callback) => {
         }
         fs.writeFileSync(`./proc/${filename}.java`, iconv.encode(args[2], "utf-8"));
         ms += `> javac ./proc/${filename}.java\n`;
-        const j = exec(`${config.paths.java}/javac.exe ./proc/${filename}.java -J-Dfile.encoding=UTF-8`);
+        const j = exec(`${config.paths.java}/javac.exe -encoding UTF8 ./proc/${filename}.java`);
         const timeout = setTimeout(() => {
             if (!j.connected) {
                 psTree(j.pid, (err, child) => {
@@ -31,7 +31,7 @@ module.exports = async (args, callback) => {
             setTimeout(() => {
                 if (code == 0) {
                     ms += `\n> cd ./proc \n/proc> java ${filename}\n`;
-                    const j2 = exec(`cd ./proc & ${config.paths.java}/java.exe ${filename} -J-Dfile.encoding=UTF-8`);
+                    const j2 = exec(`cd ${__dirname}/../../proc & ${config.paths.java}/java.exe ${filename}`);
                     j2.on("exit", () => {
                         clearTimeout(timeout);
                         fs.unlinkSync("./proc/" + filename + ".java");
@@ -39,10 +39,11 @@ module.exports = async (args, callback) => {
                         return callback("```" + ms.split("\n").slice(0, 15).join("\n") + `${ms.split("\n").length > 15 ? "\n...more " + (ms.split("\n").length - 15) + " line(s)" : ""}` + "```")
                     });
                     j2.stdout.on("data", (chunk) => {
-                        ms += iconv.decode(Buffer.from(chunk), "utf-8");
+                        console.log(chunk)
+                        ms += iconv.decode(Buffer.from(iconv.encode(chunk, "Shift_JIS")), "utf-8");
                     });
                     j2.stderr.on("data", (chunk) => {
-                        ms += iconv.decode(Buffer.from(chunk), "utf-8");
+                        ms += iconv.decode(Buffer.from(iconv.encode(chunk, "Shift_JIS")), "utf-8");
                     });
                 } else {
                     clearTimeout(timeout);
